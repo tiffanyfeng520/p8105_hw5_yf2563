@@ -179,6 +179,11 @@ prob2_tidy_df %>%
   geom_line() +
   facet_grid(~control_arm)
 ```
+ 
+The control and experiment group have different trend. 
+- For the control group: relatively stable around 1.25. 
+- For the expose group: increasing trend over time. 
+
 
 
 ## Problem 3
