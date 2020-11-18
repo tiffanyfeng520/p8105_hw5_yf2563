@@ -225,14 +225,18 @@ output = map_dfr(0:6, ~rerun(5000, sim_t_test(mu = .x)))
 plot1_df = 
 output %>% 
     group_by(mu) %>% 
-    filter(p.value<0.05) %>% 
+    filter(p.value < 0.05) %>% 
     summarize(proportion = n()/5000)
   
 plot1_df %>% 
   ggplot(aes(x = mu, y = proportion))+
   geom_point()+
-  geom_line() +
-  ggtitle("Association between effect size and power")
+  geom_line() + 
+  labs(
+    title = "Association between effect size and power",
+    x = "True mean",
+    y = "The power of the test"
+  )
 ```
 
 **Comments:**
@@ -240,14 +244,40 @@ plot1_df %>%
 The plot have an obvious increasing trend. With the increase of the true mean, he proportion of times the null was rejected (the power of the test) also increase. The association between effect size and power is positive
 
 #### Plot2
+
 - Make a plot showing the average estimate of mu on the y axis and the true value of mu on the x axis. 
-- Make a second plot (or overlay on the first) the average estimate of mu only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. Is the sample average of mu across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
+- Make a second plot (or overlay on the first) the average estimate of mu only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. 
+- Is the sample average of mu across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
 
 ```{r}
-output %>% 
+average_estimate_rejected_df =
+  output %>% 
+  filter(p.value < 0.05) %>% 
   group_by(mu) %>% 
-  summarise(
-    ave = mean(estimate)
+  summarise(average_estimate_rejected = mean(estimate))
+
+average_estimate_df =
+  output %>% 
+  group_by(mu) %>% 
+  summarise(average_estimate = mean(estimate)) %>% 
+  mutate(average_estimate_rejected = pull(average_estimate_rejected_df, average_estimate_rejected)) %>% 
+  pivot_longer(
+    average_estimate:average_estimate_rejected,
+    names_to = "type",
+    values_to = "Average_estimate"
+  )
+  
+```
+
+```{r}
+average_estimate_df %>% 
+ggplot(aes(x = mu, y = Average_estimate, color = type)) +
+  geom_point() +
+  geom_line() + 
+  labs(
+    title = "Simulation difference among two groups",
+    x = "True mean",
+    y = "Average estimate of mu"
   )
 ```
 
