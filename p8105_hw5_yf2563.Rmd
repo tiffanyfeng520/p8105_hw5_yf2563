@@ -196,43 +196,39 @@ Fix n=30, sigma=5, mu=0. Generate 5000 datasets from the model
 
 
 ```{r}
-set.seed(429)
-simulation <- function(mu, sd = 5, sample_size = 30, iteration = 5000){
+set.seed(520)
+
+sim_t_test = function(samp_size = 30, mu = 0, sigma = 5) {
   
-  tibble(
-    sample_id = 1:iteration,
-    data = rerun(iteration, rnorm(n = 30, mean = 0, sd = 5))) %>% 
-    mutate(t_test = map(.x = data, ~t.test(.x, mu = mu))) %>% 
-    mutate(result = map(.x = t_test, ~broom::tidy(.x))) %>% 
-    select(sample_id, result) %>%
-    unnest(result) %>% 
-    mutate(mu = rep(mu, iteration)) %>% 
-    select(mu, sample_id, estimate, p.value) %>% 
-    mutate(decision = case_when(
-      p.value < 0.05 ~ "Reject",
-      p.value >= 0.05 ~ "Fail to Reject"))
+  sim_data = tibble(
+    x = rnorm(samp_size, mean = mu, sd = sigma),
+  )
+  
+  sim_data  = t.test(sim_data) %>% 
+  broom::tidy() %>% 
+  mutate(mu = mu) %>% 
+  select(mu, estimate, p.value)
+  
+  sim_data
+  
+  
 }
+sim_0 = map_dfr(0, ~rerun(5000, sim_t_test(mu = .x)))
 
-simulation(0)
-
-output = map_dfr(0:6, simulation)
-
-output
+output = map_dfr(0:6, ~rerun(5000, sim_t_test(mu = .x)))
 ```
 
 #### Plot 1
 - Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of mu on the x axis. Describe the association between effect size and power.
 
 ```{r}
-plot_data_df = 
+plot1_df = 
 output %>% 
     group_by(mu) %>% 
     filter(p.value<0.05) %>% 
-    summarize(
-      proportion = n()/5000
-      )
+    summarize(proportion = n()/5000)
   
-plot_data_df %>% 
+plot1_df %>% 
   ggplot(aes(x = mu, y = proportion))+
   geom_point()+
   geom_line() +
@@ -243,6 +239,15 @@ plot_data_df %>%
 
 The plot have an obvious increasing trend. With the increase of the true mean, he proportion of times the null was rejected (the power of the test) also increase. The association between effect size and power is positive
 
-- Make a plot showing the average estimate of mu on the y axis and the true value of mu on the x axis. Make a second plot (or overlay on the first) the average estimate of mu  only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. Is the sample average of mu  across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
+#### Plot2
+- Make a plot showing the average estimate of mu on the y axis and the true value of mu on the x axis. 
+- Make a second plot (or overlay on the first) the average estimate of mu only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. Is the sample average of mu across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
 
+```{r}
+output %>% 
+  group_by(mu) %>% 
+  summarise(
+    ave = mean(estimate)
+  )
+```
 
