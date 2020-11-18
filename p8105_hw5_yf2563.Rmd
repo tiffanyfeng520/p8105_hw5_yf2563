@@ -196,6 +196,7 @@ Fix n=30, sigma=5, mu=0. Generate 5000 datasets from the model
 
 
 ```{r}
+set.seed(429)
 simulation <- function(mu, sd = 5, sample_size = 30, iteration = 5000){
   
   tibble(
@@ -212,13 +213,36 @@ simulation <- function(mu, sd = 5, sample_size = 30, iteration = 5000){
       p.value >= 0.05 ~ "Fail to Reject"))
 }
 
-output = map_dfr(1:6, simulation)
+simulation(0)
+
+output = map_dfr(0:6, simulation)
 
 output
 ```
 
-
+#### Plot 1
 - Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of mu on the x axis. Describe the association between effect size and power.
+
+```{r}
+plot_data_df = 
+output %>% 
+    group_by(mu) %>% 
+    filter(p.value<0.05) %>% 
+    summarize(
+      proportion = n()/5000
+      )
+  
+plot_data_df %>% 
+  ggplot(aes(x = mu, y = proportion))+
+  geom_point()+
+  geom_line() +
+  ggtitle("Association between effect size and power")
+```
+
+**Comments:**
+
+The plot have an obvious increasing trend. With the increase of the true mean, he proportion of times the null was rejected (the power of the test) also increase. The association between effect size and power is positive
+
 - Make a plot showing the average estimate of mu on the y axis and the true value of mu on the x axis. Make a second plot (or overlay on the first) the average estimate of mu  only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. Is the sample average of mu  across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
 
 
