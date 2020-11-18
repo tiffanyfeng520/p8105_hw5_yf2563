@@ -64,6 +64,18 @@ homicide_df =
 
 Summarize within cities to obtain the total number of homicides and the number of unsolved homicides 
 
+```{r}
+aggregate_df = 
+  homicide_df %>% 
+  group_by(city_state) %>% 
+  summarize(
+    hom_total = n(),
+    hom_unsolved = sum(resolved == "unsolved")
+  )
+
+aggregate_df
+```
+
 
 #### 1.2
 
