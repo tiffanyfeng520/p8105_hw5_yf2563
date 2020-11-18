@@ -213,9 +213,18 @@ sim_t_test = function(samp_size = 30, mu = 0, sigma = 5) {
   
   
 }
+
+# when mu = 0, generate 5000 results
 sim_0 = map_dfr(0, ~rerun(5000, sim_t_test(mu = .x)))
+sim_0
+```
+
+
+```{r}
+# result for mu = {0,1,2,3,4,5,6}
 
 output = map_dfr(0:6, ~rerun(5000, sim_t_test(mu = .x)))
+output
 ```
 
 #### Plot 1
@@ -247,7 +256,7 @@ The plot have an obvious increasing trend. With the increase of the true mean, h
 
 - Make a plot showing the average estimate of mu on the y axis and the true value of mu on the x axis. 
 - Make a second plot (or overlay on the first) the average estimate of mu only in samples for which the null was rejected on the y axis and the true value of mu on the x axis. 
-- Is the sample average of mu across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
+
 
 ```{r}
 average_estimate_rejected_df =
@@ -281,3 +290,9 @@ ggplot(aes(x = mu, y = Average_estimate, color = type)) +
   )
 ```
 
+- Is the sample average of mu across tests for which the null is rejected approximately equal to the true value of mu? Why or why not?
+
+**Comments:**
+- for mu = 0,  the sample average of mu across tests for which the null is rejected is relatively same as the true value of mu,  since the null hypothesis is mu = 0
+
+- for mu > 0, the sample average of mu across tests for which the null is rejected is approximately equal to the true value of mu with the increase of the true mean. Since from from CLT and as the mu increase, the distribution of sample mean will follows a normal distribution with increasing mu and the rejection proportion of  will get bigger. 
